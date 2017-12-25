@@ -1,14 +1,15 @@
 import random
 import copy
+import math
 numberOfCities = 100
 columns = numberOfCities
 rows = numberOfCities
 citymap = [[0 for j in range(columns)] for i in range(rows)]
 #number of reasonable steps the climber should take
-threshold = 200
+threshold = -1000
 #corresponds round trip order
 currentHypothesis = [0 for i in range(rows)]
-lastFitness = 0
+lastFitness = -math.inf
 bestHypothesis = []
 currentBestHypothesis = []
 savestate = []
@@ -27,7 +28,7 @@ def resetValues():
     global currentBestHypothesis
 
     currentHypothesis = [0 for i in range(rows)]
-    lastFitness = 0
+    lastFitness = -math.inf
     savestate = []
     currentBestHypothesis = []
     lastHypothesisIndex = 0
@@ -54,7 +55,7 @@ def init():
         while lastFitness < threshold and tries < 30000:
             savestate = copy.deepcopy(currentHypothesis)
             currentHypothesis = moveOneStepAtRandom(currentHypothesis)
-            currentFitness = lastFitness + fitness(currentHypothesis, savestate)
+            currentFitness = fitness(currentHypothesis, savestate)
             if currentFitness > lastFitness:
                 lastFitness = currentFitness
                 lastHypothesisIndex += 1
@@ -108,10 +109,11 @@ def fitness(hypothesis, savestate):
     lastDistance = getDistance(savestate)
     currentDistance = getDistance(hypothesis)
 
-    if currentDistance < lastDistance:
-        fitness = 1
-    else:
-        fitness = 0
+    #if currentDistance < lastDistance:
+    #    fitness = 1
+    #else:
+    #    fitness = 0
+    fitness = -currentDistance
     return fitness
 
 
