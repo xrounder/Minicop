@@ -19,12 +19,10 @@ lastFitness = -math.inf
 currentBestHypothesis = []
 #savegame to try another route
 savestate = []
-#last index indicating where on the route you have been to move from forward from there
-lastHypothesisIndex = 0
 #how hot shall it be?
 temperature = 100
 #how fast shall it cool down?
-epsilon = 0.001
+epsilon = 0.0001
 
 #creates random first route
 def createRandomHypothesis():
@@ -35,7 +33,6 @@ def createRandomHypothesis():
 def init():
     global lastFitness
     global savestate
-    global lastHypothesisIndex
     global currentBestHypothesis
     global temperature
     createDistanceMap()
@@ -58,15 +55,12 @@ def init():
         #should hill climber climb?
         if currentFitness > lastFitness:
             lastFitness = currentFitness
-            lastHypothesisIndex += 1
             currentBestHypothesis = copy.deepcopy(currentHypothesis)
             print("Fitness: " + str(lastFitness) + "; Distance: " + str(getDistance(currentHypothesis)) + " Temperature: " + str(temperature))
         #move one step back?
         elif randomValue < backStepAcceptance:
             lastFitness = currentFitness
-            if lastHypothesisIndex > 0:
-                lastHypothesisIndex -= 1
-            print("Move one step back. Fitness: " + str(lastFitness) + "; Distance: " + str(getDistance(currentHypothesis)) + " Temperature: " + str(temperature))
+            #print("Move one step back. Fitness: " + str(lastFitness) + "; Distance: " + str(getDistance(currentHypothesis)) + " Temperature: " + str(temperature))
         #hillclimber not allowed to climb, he needs to try a different route
         else:
             currentHypothesis = copy.deepcopy(savestate)
@@ -116,16 +110,17 @@ def fitness(hypothesis):
 
 #switch travel points in round trip randomly
 def moveOneStepAtRandom(hypothesis):
-    global lastHypothesisIndex
-    #what cities are there left to travel?
-    remainingCitiesIndices = range(lastHypothesisIndex, len(hypothesis) - 1)
-    #choose one of those cities to travel to next
-    nextIndex = random.choice(remainingCitiesIndices)
+    #choose random cities to swap them
+    randomIndex1 = int(random.random() * numberOfCities)
+    randomIndex2 = int(random.random() * numberOfCities)
+    #indices have to be different, because otherwise they are not neighbours
+    while randomIndex1 == randomIndex2:
+        randomIndex2 = int(random.random()*numberOfCities)
 
-    #swap cities
-    temp = hypothesis[lastHypothesisIndex]
-    hypothesis[lastHypothesisIndex] = hypothesis[nextIndex]
-    hypothesis[nextIndex] = temp
+    # swap
+    temp = hypothesis[randomIndex1]
+    hypothesis[randomIndex1] = hypothesis[randomIndex2]
+    hypothesis[randomIndex2] = temp
     return hypothesis
 
 

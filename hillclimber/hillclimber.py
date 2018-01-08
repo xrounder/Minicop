@@ -6,14 +6,13 @@ columns = numberOfCities
 rows = numberOfCities
 citymap = [[0 for j in range(columns)] for i in range(rows)]
 #number of reasonable steps the climber should take
-threshold = -1000
+threshold = -900
 #corresponds round trip order
 currentHypothesis = [0 for i in range(rows)]
 lastFitness = -math.inf
 bestHypothesis = []
 currentBestHypothesis = []
 savestate = []
-lastHypothesisIndex = 0
 
 def createRandomHypothesis():
     global currentHypothesis
@@ -24,21 +23,18 @@ def resetValues():
     global currentHypothesis
     global lastFitness
     global savestate
-    global lastHypothesisIndex
     global currentBestHypothesis
 
     currentHypothesis = [0 for i in range(rows)]
     lastFitness = -math.inf
     savestate = []
     currentBestHypothesis = []
-    lastHypothesisIndex = 0
 
 
 def init():
     global currentHypothesis
     global lastFitness
     global savestate
-    global lastHypothesisIndex
     global bestHypothesis
     global currentBestHypothesis
     numberOfRuns = 0
@@ -58,7 +54,6 @@ def init():
             currentFitness = fitness(currentHypothesis, savestate)
             if currentFitness > lastFitness:
                 lastFitness = currentFitness
-                lastHypothesisIndex += 1
                 currentBestHypothesis = copy.deepcopy(currentHypothesis)
                 print("Fitness: " + str(lastFitness) + "; Distance: " + str(getDistance(currentHypothesis)))
                 tries = 0
@@ -106,28 +101,24 @@ def getDistance(hypothesis):
 
 #calculates value of round trip distance
 def fitness(hypothesis, savestate):
-    lastDistance = getDistance(savestate)
-    currentDistance = getDistance(hypothesis)
 
-    #if currentDistance < lastDistance:
-    #    fitness = 1
-    #else:
-    #    fitness = 0
+    currentDistance = getDistance(hypothesis)
     fitness = -currentDistance
     return fitness
 
 
 #switch travel points in round trip randomly
 def moveOneStepAtRandom(hypothesis):
-    global lastHypothesisIndex
-    visitedCitiesIndices = range(lastHypothesisIndex)
-    remainingCitiesIndices = range(lastHypothesisIndex, len(hypothesis) - 1)
-    nextIndex = random.choice(remainingCitiesIndices)
+    randomIndex1 = int(random.random()*numberOfCities)
+    randomIndex2 = int(random.random()*numberOfCities)
+    #indices have to be different, because otherwise they are not neighbours
+    while randomIndex1 == randomIndex2:
+        randomIndex2 = int(random.random()*numberOfCities)
 
     #swap
-    temp = hypothesis[lastHypothesisIndex]
-    hypothesis[lastHypothesisIndex] = hypothesis[nextIndex]
-    hypothesis[nextIndex] = temp
+    temp = hypothesis[randomIndex1]
+    hypothesis[randomIndex1] = hypothesis[randomIndex2]
+    hypothesis[randomIndex2] = temp
     return hypothesis
 
 
