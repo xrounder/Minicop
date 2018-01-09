@@ -51,6 +51,7 @@ def init():
         #for conditional statement to move one step back
         randomValue = random.random()
         backStepAcceptance = math.exp((currentFitness - lastFitness) / temperature)
+        print("Probabiliy to move back: " + str(backStepAcceptance))
 
         #should hill climber climb?
         if currentFitness > lastFitness:
@@ -60,7 +61,8 @@ def init():
         #move one step back?
         elif randomValue < backStepAcceptance:
             lastFitness = currentFitness
-            #print("Move one step back. Fitness: " + str(lastFitness) + "; Distance: " + str(getDistance(currentHypothesis)) + " Temperature: " + str(temperature))
+            #print("Probabiliy move back: " + str(backStepAcceptance))
+            print("Move one step back. Fitness: " + str(lastFitness) + "; Distance: " + str(getDistance(currentHypothesis)) + " Temperature: " + str(temperature))
         #hillclimber not allowed to climb, he needs to try a different route
         else:
             currentHypothesis = copy.deepcopy(savestate)
@@ -115,7 +117,7 @@ def moveOneStepAtRandom(hypothesis):
     randomIndex2 = int(random.random() * numberOfCities)
     #indices have to be different, because otherwise they are not neighbours
     while randomIndex1 == randomIndex2:
-        randomIndex2 = int(random.random()*numberOfCities)
+        randomIndex2 = int(random.random() * numberOfCities)
 
     # swap
     temp = hypothesis[randomIndex1]
