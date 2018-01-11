@@ -303,7 +303,7 @@ public class MNISTReader extends JFrame {
 				frame.setVisible(true);
 				frame.repaint();
 				try {
-				    Thread.sleep(200);                 //20 milliseconds is one second.
+				    Thread.sleep(500);                 //20 milliseconds is one second.
 				} catch(InterruptedException ex) {
 				    Thread.currentThread().interrupt();
 				}
