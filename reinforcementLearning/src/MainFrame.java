@@ -3,7 +3,6 @@ import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.ImageObserver;
-import java.util.Random;
 
 import javax.swing.JFrame;
 
@@ -43,7 +42,7 @@ public class MainFrame extends JFrame {
 	}
 
 	// For speed adjustments
-	int miliseconds = 0;
+	int milliseconds = 0;
 
 	// Frame will display when true
 	public static boolean display = false;
@@ -51,54 +50,62 @@ public class MainFrame extends JFrame {
 	//The max. positions of the ball, paddle and velocity
 	int maxXBall = 10;
 	int maxYBall = 10;
-	int maxXSchlaeger = 10;
-	int maxXVel = 2;
-	int maxYVel = 2;
+	int maxXV = 2;
+	int maxYV = 2;
+	int maxXPaddle = 10;
+	int numActions = 3;
 
 	//Matrix with Q-Values for each state and action
-	public double[][] Q = new double[maxXBall*maxYBall*maxXSchlaeger*maxXVel*maxYVel][2];
+	public double[][] Q = new double[maxXBall*maxYBall* maxXPaddle * maxXV * maxYV][numActions];
 
 	int counter = 0;
 	int max_Counter = 100000;
 
-	int lastreward = 0;
-	int lastState = 0;
-	int lastAction = 0;
+	int reward = 0;
+	int state = 0;
+	int action = 0;
 
 	/**
 	 * Here we start the program
 	 */
 	public void run() {
-		//Statring points of the ball, the paddle and the ball's velocity
-		int xBall=5, yBall=6, xSchlaeger=5, xV=1, yV=1;
+		//Starting points of the ball, the paddle and the ball's velocity
+		int xBall=5;
+		int yBall=6;
+		int xPaddle=5;
+		int xV=1;
+		int yV=1;
 
 		while (!stop) {
 			if(display) {
 				inputOutput.fillRect(0,0,imageWidth, imageHeight, Color.black);
 				inputOutput.fillRect(xBall*30, yBall*30, 30, 30, Color.green);
-				inputOutput.fillRect(xSchlaeger*30, 11*30+20, 90, 10, Color.orange);
+				inputOutput.fillRect(xPaddle*30, 11*30+20, 90, 10, Color.orange);
 			}
 
 			//Now we get the state the agent is in within the environment
-			int s = getState(xBall, yBall, xSchlaeger, xV, yV);
+			int currentState = getState(xBall, yBall, xPaddle, xV, yV);
 
 			//Determine the action to take
-			int action = qLearning(s, lastreward);
+			int action = calcQLearning(currentState, reward);
 
 			//Move the paddle according to action
-			if (action==0){
-				xSchlaeger--;
-			}
 			if (action==1){
-				xSchlaeger++;
+				xPaddle--; //left
+			}
+			if (action==2){
+				xPaddle++; //right
+			}
+			if (action==0){
+				//stay and do nothing
 			}
 
 			//We must not let the paddle go out of bounds
-			if (xSchlaeger<0){
-				xSchlaeger=0;
+			if (xPaddle<0){
+				xPaddle=0;
 			}
-			if (xSchlaeger>10){
-				xSchlaeger=10;
+			if (xPaddle>10){
+				xPaddle=10;
 			}
 
 			//Here we move the ball according to the set velocity one unit on the X- and Y-Axis
@@ -118,8 +125,8 @@ public class MainFrame extends JFrame {
 			// -1 for a miss
 			// 0 for nothing
 			if (yBall==11){
-				if (xSchlaeger==xBall || xSchlaeger==xBall-1 || xSchlaeger==xBall-2){ // Paddle is three units long
-					lastreward = 1;
+				if (xPaddle==xBall || xPaddle==xBall-1 || xPaddle==xBall-2){ // Paddle is three units long
+					reward = 1;
 
 					if(counter >= max_Counter){
 						System.out.println("Positive reward.");
@@ -130,23 +137,22 @@ public class MainFrame extends JFrame {
 						System.out.println("Negative reward.");
 					}
 
-					lastreward = -1;
+					reward = -1;
 				}
 			} else {
-				lastreward = 0;
+				reward = 0;
 			}
-
 
 			//This is just to adjust the speed
 			try {
-				Thread.sleep(miliseconds);                 //1000 milliseconds is one second.
+				Thread.sleep(milliseconds);                 //1000 milliseconds is one second.
 			} catch(InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
 
-			//Wait until counter is reached bevore drawing anything
+			//Wait until counter is reached before drawing anything
 			if(counter >= max_Counter){
-				miliseconds = 100;
+				milliseconds = 100;
 				display = true;
 				counter = 0;
 			}else{
@@ -154,7 +160,7 @@ public class MainFrame extends JFrame {
 			}
 
 			if(display) {
-				//System.out.println(this.Q[s][action]);
+				System.out.println("Q: " + this.Q[currentState][action]);
 				repaint();
 				validate();
 			}
@@ -166,41 +172,39 @@ public class MainFrame extends JFrame {
 	 *
 	 * @param xBall Position of the ball on the X-Axis
 	 * @param yBall Position of the ball on the Y-Axis
-	 * @param xSchlaeger Position of the paddle on the X-Axis
+	 * @param xPaddle Position of the paddle on the X-Axis
 	 * @param xV Velocity along the X-Axis
 	 * @param yV Velocity along the Y-Axis
 	 * @return The calculated state
 	 */
-	public int getState(int xBall, int yBall, int xSchlaeger, int xV, int yV){
+	public int getState(int xBall, int yBall, int xPaddle, int xV, int yV){
 		xV += 1;
 		yV += 1;
 
-		return (xBall + yBall * maxYBall + xSchlaeger * (maxYBall * maxXSchlaeger)
-				+ xV * (maxYBall *maxXSchlaeger * maxXVel) + yV *(maxYBall *maxXSchlaeger * maxXVel*maxYVel) );
+		return (xBall + yBall * maxYBall + xPaddle * (maxYBall * maxXPaddle)
+				+ xV * (maxYBall * maxXPaddle * maxXV) + yV *(maxYBall * maxXPaddle * maxXV * maxYV) );
 	}
 
 	/**
 	 * Selects an action based on learned Q-Values
 	 * @param Q
-	 * @return The action
+	 * @return The best possible action
 	 */
-	public int selectAction(double[] Q) {
-		int action = 0;
-		Double value = null;
+	public int selectBestAction(double[] Q) {
+		int bestAction = 0;
+		Double highestValue = null;
 
-		// Search the highest computed Q value in order to determine action
+		// Search the highest computed Q highestValue in order to determine action
 		for(int i = 0; i < Q.length; i++) {
-			if(value == null) {
-				value = Q[i];
-				action = i;
-			} else {
-				if(Q[i] > value) {
-					value = Q[i];
-					action = i;
-				}
+			if(highestValue == null) {
+				highestValue = Q[i];
+				bestAction = i;
+			} else if(Q[i] > highestValue) {
+					highestValue = Q[i];
+					bestAction = i;
 			}
 		}
-		return action;
+		return bestAction;
 	}
 
 	/**
@@ -210,18 +214,15 @@ public class MainFrame extends JFrame {
 	 * @param reward The new reward
 	 * @return The next action to take
 	 */
-	public int qLearning(int state, int reward) {
-		int nextAction = selectAction(Q[state]);
-		if(nextAction > 1) {
-			nextAction = 0;
-		}
+	public int calcQLearning(int state, int reward) {
+		int nextAction = selectBestAction(Q[state]);
 
 		//Q-Learning update formula
-		Q[lastState][lastAction] += 0.5 * (reward + 0.5 * this.Q[state][nextAction] - this.Q[lastState][lastAction]); //Slide 64
+		Q[this.state][action] += 0.5 * (reward + 0.9 * Q[state][nextAction] - Q[this.state][action]); //Slide 64
 
 		//Save the state and action for next iteration
-		lastState = state;
-		lastAction = nextAction;
+		this.state = state;
+		action = nextAction;
 
 		return nextAction;
 	}
