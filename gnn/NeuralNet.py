@@ -45,48 +45,36 @@ class neuralNetwork:
         return final_outputs
 
 if __name__ == "__main__":
-    n = neuralNetwork(2,4,1,0.5)
+    n = neuralNetwork(2,4,1,0.04)
 
-    max = 9
+    max = 15
     #training
     print("training Net ... \n")
     for i in range(10000):
 
-        for x in range(max):
-            #for y in range(max):
-                valX = x/10
-                valY = valX
+        valX = random.randint(-max,0)/10
+        valY = random.randint(0,max)/10
 
-                #Pythagoras
-                valZ = (valX*valX)+(valY*valY)
-                result = math.sqrt(valZ)
+        #Pythagoras
+        valZ = (valX*valX)+(valY*valY)
+        result = math.sqrt(valZ)
 
-                if result <= 1:
-                    #print("BIGGER 1 ",result)
-                    #n.train([valX,valY],[0])
-                    #print("SMALLER 1 ",result)
-                    n.train([valX,valY],[0.8])
-                    #n.train([valX*-1,valY*-1],[0.8])
-                    #n.train([valX*-1,valY],[0.8])
-                    #n.train([valX,valY*-1],[0.8])
-                else:
-                    n.train([valX,valY],[0.1])
-                    #n.train([valX * -1, valY * -1], [0.1])
-                    #n.train([valX*-1,valY],[0.1])
-                    #n.train([valX, valY*-1], [0.1])
+        if result < 1:
+            n.train([valX,valY],[0.8])
+        elif result >= 1:
+           n.train([valX,valY],[0.1])
 
 
-
-
+    #Visualization
     for x in range(-max,max):
         for y in range(-max,max):
 
             result = n.query([x/10, y/10])
             print("X ",x/10," Y ",y/10,result)
-            if (result >= 0.7 and result <= 0.89):
+            if (result >= 0.71 and result <= 0.89):
                 plt.plot([x/10], [y/10], marker='o', markersize=2, color="red")
             else:
-                plt.plot([x/10], [y/10], marker='o', markersize=2, color="black")
+                plt.plot([x/10], [y/10], marker='o', markersize=2, color="lightgrey")
 
     plt.ylabel('y')
     plt.show()
