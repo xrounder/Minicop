@@ -8,34 +8,37 @@ import math
 
 class neuralNetwork:
 
-    def __init__(self, inputNodes, hiddenNodes, outputNodes, learningRate):
-        self.inputNodes = inputNodes
+    def __init__(self, inputNodes, hiddenNodes, outputNodes, learningRate, bias):
+        self.inputNodes = inputNodes + 1
         self.hiddenNodes = hiddenNodes
         self.outputNodes = outputNodes
         self.learningRate = learningRate
+        self.bias = bias
 
-       # print(self.hiddenNodes,self.inputNodes)
-
-
-        self.weightsHidden = (numpy.random.rand(self.hiddenNodes, self.inputNodes) - 0.5)
-        self.weightsOutput = (numpy.random.rand(self.hiddenNodes, self.outputNodes) - 0.5)
-        #print(self.weightsHidden)
-        #self.weightsHidden = (numpy.range(1,1))
+        #matrix with dimensions hiddenNodes*inputNodes, generating random values between -0.5 and 0.5
+        self.weightsHidden = (numpy.random.rand(self.hiddenNodes, self.inputNodes)-0.5)
+        self.weightsOutput = (numpy.random.rand(self.hiddenNodes, self.outputNodes)-0.5)
 
         self.activation_function = lambda x: scipy.special.expit(x)
         pass
 
     def train(self, input_list, target_list):
 
-        #print(target_list)
+        input_list.append(self.bias)
+        #ALWAYS MATRICIES
         inputs = numpy.array(input_list, ndmin=2).T
         targets =  numpy.array(target_list, ndmin=2).T
-        #print(targets)
 
+        #sum of all weights and inputs, before sigmoid
         hidden_inputs = numpy.dot(self.weightsHidden,inputs)
+        #sum of all weights and input, after sigmoid
         hidden_outputs = self.activation_function(hidden_inputs)
+
+        #output value before sigmoid
         final_inputs = numpy.dot(self.weightsOutput.T,hidden_outputs)
+        #output value after sigmoid
         final_outputs = self.activation_function(final_inputs)
+
         output_errors = targets - final_outputs
         hidden_errors = numpy.dot(self.weightsOutput, output_errors)
 
@@ -43,13 +46,16 @@ class neuralNetwork:
         #print(targets)
         #print(hidden_inputs)
         #print(hidden_outputs)
-       # print(final_inputs)
+        #print(final_inputs)
         #print(final_outputs)
 
+        #backpropagation
         self.weightsOutput += self.learningRate * numpy.dot((output_errors*final_outputs*(1.0 - final_outputs)), hidden_outputs.T).T
         self.weightsHidden += self.learningRate * numpy.dot(hidden_errors*hidden_outputs*(1.0 - hidden_outputs),numpy.transpose(inputs))
 
     def query(self, inputs_list):
+        inputs_list.append(self.bias)
+
         inputs = numpy.array(inputs_list, ndmin=2).T
         hidden_inputs = numpy.dot(self.weightsHidden, inputs)
         hidden_outputs = self.activation_function(hidden_inputs)
@@ -58,20 +64,16 @@ class neuralNetwork:
         return final_outputs
 
 if __name__ == "__main__":
-    n = neuralNetwork(2,4,1,0.2)
+    n = neuralNetwork(2,4,1,0.4,1)
 
     max = 15
     #training
-
-
-
     print("training Net ... \n")
-    for i in range(5000):
+    for i in range(8700):
 
-        #valX = random.randint(-max,0)/10
-        #valY = random.randint(0,max)/10
-        valX = random.randint(0,max)/10
-        valY = random.randint(0,max)/10
+        #random value between -1.5 and 1.5
+        valX = random.randint(-max,max)/10
+        valY = random.randint(-max,max)/10
 
         #Pythagoras
         valZ = (valX*valX)+(valY*valY)
@@ -84,12 +86,12 @@ if __name__ == "__main__":
 
 
     #Visualization
-    for x in range(-20,20):
-        for y in range(-20,20):
+    for x in range(-max,max):
+        for y in range(-max,max):
 
             result = n.query([x/10, y/10])
-            print("X ",x/10," Y ",y/10,result)
-            if (result >= 0.75 and result <= 0.85):
+            #print("X ",x/10," Y ",y/10,result)
+            if (result >= 0.71 and result <= 0.89):
                 plt.plot([x/10], [y/10], marker='o', markersize=2, color="red")
             else:
                 plt.plot([x/10], [y/10], marker='o', markersize=2, color="lightgrey")
