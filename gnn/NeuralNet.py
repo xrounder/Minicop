@@ -16,8 +16,13 @@ class neuralNetwork:
         self.bias = bias
 
         #matrix with dimensions hiddenNodes*inputNodes, generating random values between -0.5 and 0.5
-        self.weightsHidden = (numpy.random.rand(self.hiddenNodes, self.inputNodes)-0.5)
-        self.weightsOutput = (numpy.random.rand(self.hiddenNodes, self.outputNodes)-0.5)
+        #self.weightsHidden = (numpy.random.rand(self.hiddenNodes, self.inputNodes)-0.5)
+        #self.weightsOutput = (numpy.random.rand(self.hiddenNodes, self.outputNodes)-0.5)
+
+        #matrix with dimension hiddenNodes*inputNodes, generating random values between -0.1 and 0.1
+        self.weightsHidden = (numpy.random.randint(15, size=(self.hiddenNodes,self.inputNodes))/100 - 0.05)
+        self.weightsOutput = (numpy.random.randint(15, size=(self.hiddenNodes,self.outputNodes))/100 - 0.05)
+
 
         self.activation_function = lambda x: scipy.special.expit(x)
         pass
@@ -51,7 +56,8 @@ class neuralNetwork:
 
         #backpropagation
         self.weightsOutput += self.learningRate * numpy.dot((output_errors*final_outputs*(1.0 - final_outputs)), hidden_outputs.T).T
-        self.weightsHidden += self.learningRate * numpy.dot(hidden_errors*hidden_outputs*(1.0 - hidden_outputs),numpy.transpose(inputs))
+        self.weightsHidden += self.learningRate * numpy.dot(hidden_errors*hidden_outputs*(1.0 - hidden_outputs),inputs.T)
+        #self.weightsHidden += self.learningRate * numpy.dot((output_errors*final_outputs*(1.0 - final_outputs))*(hidden_outputs*(1.0 - hidden_outputs)), inputs.T)
 
     def query(self, inputs_list):
         inputs_list.append(self.bias)
@@ -64,12 +70,14 @@ class neuralNetwork:
         return final_outputs
 
 if __name__ == "__main__":
-    n = neuralNetwork(2,4,1,0.4,1)
+    n = neuralNetwork(2,4,1,0.5,1)
 
     max = 15
+
+
     #training
     print("training Net ... \n")
-    for i in range(8700):
+    for i in range(10000):
 
         #random value between -1.5 and 1.5
         valX = random.randint(-max,max)/10
@@ -90,7 +98,7 @@ if __name__ == "__main__":
         for y in range(-max,max):
 
             result = n.query([x/10, y/10])
-            #print("X ",x/10," Y ",y/10,result)
+            print("X ",x/10," Y ",y/10,result)
             if (result >= 0.71 and result <= 0.89):
                 plt.plot([x/10], [y/10], marker='o', markersize=2, color="red")
             else:
@@ -98,4 +106,3 @@ if __name__ == "__main__":
 
     plt.ylabel('y')
     plt.show()
-
