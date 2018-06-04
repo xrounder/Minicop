@@ -20,7 +20,15 @@ class neuralNetwork:
         #self.weightsOutput = (numpy.random.rand(self.hiddenNodes, self.outputNodes)-0.5)
 
         #matrix with dimension hiddenNodes*inputNodes, generating random values between -0.1 and 0.1
+        """
+        self.weightsHidden = numpy.matrix([[1,1,0],
+                                          [1,0,1],
+                                          [1,-1,0],
+                                          [1,0,-1]])
+
+        """
         self.weightsHidden = (numpy.random.randint(15, size=(self.hiddenNodes,self.inputNodes))/100 - 0.05)
+        #self.weightsHidden = (numpy.ones((self.hiddenNodes,self.inputNodes)))
         self.weightsOutput = (numpy.random.randint(15, size=(self.hiddenNodes,self.outputNodes))/100 - 0.05)
 
 
@@ -70,14 +78,13 @@ class neuralNetwork:
         return final_outputs
 
 if __name__ == "__main__":
-    n = neuralNetwork(2,4,1,0.5,1)
+    n = neuralNetwork(2,4,1,0.1,1)
 
     max = 15
 
-
     #training
     print("training Net ... \n")
-    for i in range(10000):
+    for i in range(55000):
 
         #random value between -1.5 and 1.5
         valX = random.randint(-max,max)/10
